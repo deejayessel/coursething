@@ -74,11 +74,10 @@ class CourseTime():
             for c in s[:s.find(' ')]: #for all weekdays
                 n = days.find(c)
                 
-                pos = s.find(' ')+1
-                start = s[pos:pos+5].strip()
+                start = s[s.find(' ')+1:s.find(' - ')+1].strip()
+                end = s[s.find(' - ')+3:s.find('\n')+1].strip()
 
-                pos = s.find(' - ')+3
-                end = s[pos:pos+5].strip()
+                print(start,end)
 
                 self.ranges.append((self._intify(start, n),
                                     self._intify(end, n)))
@@ -95,7 +94,7 @@ class CourseTime():
         
         sep = s.find(':')
         hour = int(s[:sep]) 
-        if 'pm' in s: hour += 12
+        if 'pm' in s: hour = (hour%12) + 12
 
         min = int(s[sep+1:sep+3])
 
@@ -110,7 +109,7 @@ class CourseTime():
 
     def _checkRep(self):
         for start, end in self.ranges:
-            assert start < end, "start time is later than end time: {start} . {end}"
+            assert start < end, f"start time is later than end time: {start} . {end} : {self.string}"
 
     def __str__(self):
         return str(self.ranges)
@@ -121,13 +120,14 @@ class CourseTime():
 if __name__ == '__main__':
 #    readTable()
 
-    def hasConflict(set, item):
-        for s in set:
-            if item.hasConflictWith(s):
-                return True
-        return False
-
     def firstUnconflicting(setList, item):
+
+        def hasConflict(set, item):
+            for s in set:
+                if item.hasConflictWith(s):
+                    return True
+            return False
+
         for i in range(len(setList)):
             if not hasConflict(setList[i], item):
                 return i
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         setlist = [set()]
         courselist = [[]]
 
-        for i in range(0,len(db['title']),250):
+        for i in range(0,len(db['title']),25):
             if db['time'][i] in ['Cancelled', 'TBA', '']:
                 continue
 
