@@ -1,37 +1,44 @@
 import html.parser
 from bs4 import BeautifulSoup
 from course import *
+import shelve
 
-import pickle
-import dbm
+select = {
+    'title' : '#main > ul > li > div.Rtable-cell.alpha.hiddenSmall.classes',
+    'dreq' : '#main > ul > li > div.Rtable-cell.hiddenSmall.attr.flexcenter-desktop',
+    'instructor' : '#main > ul > li > div.Rtable-cell.hiddenSmall.instructors',   
+    'id' : '#main > ul > li > div.Rtable-cell.omega.hiddenSmall.Class.Nbr.flexcenter-desktop', 
+    'time' : '#main > ul > li > div.Rtable-cell.hiddenSmall.times > span',
+    }
 
-def readData():
+# functions for extracting data from table cells
+extractor = dict()
+extractor.update(dict.fromkeys(list(select), 
+                               lambda x: [i.text.strip() for i in x]))
+extractor['instructor'] : lambda cell: [i.text.strip() for i in cell.select('a')]
+
+def readTable():
     with open('table.html', 'r') as f:
         text = ''.join(f.readlines())
 
     soup = BeautifulSoup(text, 'html.parser')
-    selector_prefix = "#main > ul > li > div.Rtable-cell.alpha.hiddenSmall."
 
-    elements = { 
-        'titles' : soup.select(selector_prefix + "classes"),
-        'divreq' : soup.select(selector_prefix + "dreq"),
-        'instructors' : soup.select(selector_prefix + "instructors"),
-        'coursenums' : soup.select("#main > ul > li > div.Rtable-cell.omega.hiddenSmall.Class.Nbr"),
-        'times' : soup.select(selector_prefix + "times"),
-        }
+    with shelve.open('courses') as db:
+        for k,v in select.items():
+            selected = soup.select(select[k])[1:]
+            db[k] = extractor[k](selected)
 
-    with dbm.open('courses.db', 'c') as data:
-        data['instructors'] = [ j.string.strip() for j in [ i.find_all('a') for i in elements['instructors'] ] ]
-        data['titles'] = [ i.text.replace('\n','') for i in elements['titles'] ]
-        data['coursenums'] = [ i.text.strip() for i in elements['coursenums'] ]
-        data['divreq'] = [ i.text for i in elements['divreq'] ]
-        data['times'] = [ i.span.contents for i in elements['times'] if i.span is not None ]
+def printTable():
+    with shelve.open('courses') as db:
+        for k,v in db.items():
+            print(f"CATEGORY: {k}")
+            for i in v:
+                print(i)
 
-    print('pickling...')
-    pickle.dump(data, open('data.txt', 'wb'))
-    print('done pickling!')
+def writeCourseDB():
 
 
-
-    
+if __name__ == '__main__':
+    readTable()
+    printTable()
     
