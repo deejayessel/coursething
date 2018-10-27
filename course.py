@@ -16,13 +16,13 @@ class Course():
 
     #__slots__ = ['title', 'div', 'req', 'instructors', 'time', 'classnum', 'link']
 
-    def __init__(self, title, div, req, instructors, time, classnum, link):
+    def __init__(self, title, div, req, instructors, time, id, link):
         self.title = title
         self.div = div
         self.req = req
         self.instructors = instructors
         self.time = time
-        self.classnum = classnum
+        self.id = id
         self.link = link
 
     def __str__(self):
