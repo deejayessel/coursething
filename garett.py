@@ -1,5 +1,5 @@
-import html.parser
 from bs4 import BeautifulSoup
+import html.parser
 from course import *
 import shelve
 
@@ -13,10 +13,14 @@ select = {
     }
 
 # functions for extracting data from table cells
-extractor = dict()
-extractor.update(dict.fromkeys(list(select), 
-                               lambda x: x.text.strip()))
-extractor['instructors'] = lambda x: [i.text.strip() for i in x.select('a')] 
+extractor = {
+    'title' : lambda x: x.text.strip(),
+    'dreq' : lambda x: x.text.strip(),
+    'id' : lambda x: x.text.strip(),
+    'time' : lambda x: x.text.strip(),
+    'link' : lambda x: x.text.strip(),
+    'instructors': lambda x: [i.text.strip() for i in x.select('a')],
+}
 
 def readTable():
     with open('table.html', 'r') as f:
@@ -51,14 +55,104 @@ def writeCourseDB():
                                    db['id'][i],
                                    db['link'][i])
 
+
+class CourseTime():
+    """
+    TBA, Cancelled, '' --> empty range
+    Store list of ranges for which class is in session
+    Resolve conflicts
+
+    Stores course times as list of ranges(tuples with starting and ending time)
+    """
+
+
+    def __init__(self, s):
+        self.ranges = []
+        self.string = s
+        days = 'MTWRF'
+        if s not in ['TBA', 'Cancelled', '']:
+            for c in s[:s.find(' ')]: #for all weekdays
+                n = days.find(c)
+                
+                pos = s.find(' ')+1
+                start = s[pos:pos+5].strip()
+
+                pos = s.find(' - ')+3
+                end = s[pos:pos+5].strip()
+
+                self.ranges.append((self._intify(start, n),
+                                    self._intify(end, n)))
+        self._checkRep()
+
+    def _intify(self, s, daynum):
+        """ 
+        Return a string time as an integer between 0 and 1440 
+
+        Pre: assumes that `s` is a well-formed time
+
+        (eg) 11:00 am; 1:00 pm
+        """
+        
+        sep = s.find(':')
+        hour = int(s[:sep]) 
+        if 'pm' in s: hour += 12
+
+        min = int(s[sep+1:sep+3])
+
+        return daynum*1440 + (hour * 60 + min)
+
+    def hasConflictWith(self, other):
+        for s1, e1 in self.ranges:
+            for s2, e2 in other.ranges:
+                if s1 < e2 and s2 < e1:
+                    return True
+        return False
+
+    def _checkRep(self):
+        for start, end in self.ranges:
+            assert start < end, "start time is later than end time: {start} . {end}"
+
+    def __str__(self):
+        return str(self.ranges)
+
+    def __repr__(self):
+        return self.__str__()
+
 if __name__ == '__main__':
-    readTable()
+#    readTable()
+
+    def hasConflict(set, item):
+        for s in set:
+            if item.hasConflictWith(s):
+                return True
+        return False
+
+    def firstUnconflicting(setList, item):
+        for i in range(len(setList)):
+            if not hasConflict(setList[i], item):
+                return i
+        return len(setList)
+
     with shelve.open('raw') as db:
-        for k,v in db.items():
-            print(k, len(v))
+        setlist = [set()]
+        courselist = [[]]
 
-        for k,v in db.items():
-            print("****")
-            print(v[0], k)
+        for i in range(0,len(db['title']),250):
+            if db['time'][i] in ['Cancelled', 'TBA', '']:
+                continue
 
-        print(type(db['instructors'][0]))
+            u = CourseTime(db['time'][i])
+            
+            # find the first set where there is no conflict with u and add the course there
+            pos = firstUnconflicting(setlist, u)
+            if pos == len(setlist): 
+                setlist.append(set())
+                courselist.append([])
+            setlist[pos].add(u)
+            courselist[pos].append(db['title'][i] + "\n" + db['time'][i])
+                    
+        for set in reversed(courselist):
+            print("SET START **********")
+            for course in set:
+                print(course)
+            print("********** SET END")
