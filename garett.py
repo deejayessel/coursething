@@ -61,6 +61,7 @@ def getHistograms():
         weeklyTimeList = [[x for x in range(480, 1300, 5)], [x for x in range(1920, 2740, 5)],
             [x for x in range(3360, 4180, 5)],[x for x in range(4800, 5620, 5)],[x for x in range(6240, 7060, 5)]]
 
+
         coursePrefixList = ["ALL "]
         coursePrefixTimeList = [[[0 for x in range(480, 1300, 5)], [0 for x in range(1920, 2740, 5)],
             [0 for x in range(3360, 4180, 5)],[0 for x in range(4800, 5620, 5)],[0 for x in range(6240, 7060, 5)]]]
@@ -95,6 +96,16 @@ def getHistograms():
         print(coursePrefixList)
         for i in coursePrefixTimeList[0]:
             print(i)
+
+
+        print(numTimeList)
+        plt.ylabel('Number of Classes happening')
+        plt.xlabel('Time')
+        plt.title('Histogram of Classes happening at any time')
+        plt.bar(timeList,numTimeList, width = 4)
+
+        plt.grid(True)
+        plt.show()
 
 
 class CourseTime():
@@ -178,16 +189,8 @@ if __name__ == '__main__':
         setlist = [set()]
         courselist = [[]]
 
+        getHistograms()
 
-
-        # print(numTimeList)
-        # plt.ylabel('Number of Classes happening')
-        # plt.xlabel('Time')
-        # plt.title('Histogram of Classes happening at any time')
-        # plt.bar(timeList,numTimeList, width = 4)
-        #
-        # plt.grid(True)
-        #plt.show()
 
 
 
