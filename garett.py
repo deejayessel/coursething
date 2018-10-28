@@ -16,7 +16,7 @@ select = {
 # functions for extracting data from table cells
 extractor = {
     'title' : lambda x: x.text.strip(),
-    'dreq' : lambda x: [y.replace(';','') for y in x.text.strip().split('; ')]
+    'dreq' : lambda x: [y.replace(';','') for y in x.text.strip().split('; ')],
     'id' : lambda x: x.text.strip(),
     'time' : lambda x: x.text.strip(),
     'link' : lambda x: x.text.strip(),
@@ -43,19 +43,25 @@ def printTable():
             for i in v:
                 print(i)
 
-def updateTimelist(u, weeklyTimeList, coursePrefixTimeList):
+def updateTimelist(u, weeklyTimeList, coursePrefixTimeList,divReq):
     for s1, e1 in u.ranges:
         for k in range(len(weeklyTimeList[0])):
             if s1 <= weeklyTimeList[s1//1440][k] and e1 > weeklyTimeList[e1//1440][k]:
                 coursePrefixTimeList[0][s1//1440][k] +=1
                 coursePrefixTimeList[len(coursePrefixTimeList)-1][s1//1440][k] +=1
+                if divReq == 'I':
+                    coursePrefixTimeList[1][s1//1440][k] +=1
+                elif divReq == 'II':
+                    coursePrefixTimeList[2][s1//1440][k] +=1
+                elif divReq == 'III':
+                    coursePrefixTimeList[3][s1//1440][k] +=1
 
 def getHistograms():
 
     with shelve.open('raw') as db:
         weeklyTimeList = [[x for x in range(1440*i + 480, 1440*i + 1300, 5)] for i in range(5)]
-        coursePrefixList = ["ALL"]
-        coursePrefixTimeList = [[[0] * ((1300-480)//5) for i in range(5)]]
+        coursePrefixList = ["ALL","DIV1","DIV2","DIV3"]
+        coursePrefixTimeList = [[[0] * ((1300-480)//5) for i in range(5)] for j in range(4)]
 
         for i in range(0,len(db['title'])):
             if db['time'][i] in ['Cancelled', 'TBA', '']:
@@ -64,15 +70,24 @@ def getHistograms():
             u = CourseTime(db['time'][i])
             toCheck = db['title'][i][:4].strip()
 
+            divReq = db['dreq'][i][0][9:]
+
             if toCheck != coursePrefixList[len(coursePrefixList)-1]:
                 coursePrefixList.append(toCheck)
                 coursePrefixTimeList.append([[0] * ((1300-480)//5) for i in range(5)])
 
-            updateTimelist(u, weeklyTimeList, coursePrefixTimeList)
+            updateTimelist(u, weeklyTimeList, coursePrefixTimeList,divReq)
 
         print(coursePrefixList)
-        for i in coursePrefixTimeList[0]:
+        for i in coursePrefixTimeList[1]:
             print(i)
+        print()
+        for i in coursePrefixTimeList[2]:
+            print(i)
+        print()
+        for i in coursePrefixTimeList[3]:
+            print(i)
+        print()
 
         with shelve.open('prefixes') as pdb:
             for prefix, timelist in zip(coursePrefixList, coursePrefixTimeList):
