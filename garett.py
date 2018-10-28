@@ -16,7 +16,7 @@ select = {
 # functions for extracting data from table cells
 extractor = {
     'title' : lambda x: x.text.strip(),
-    'dreq' : lambda x: x.text.strip(),
+    'dreq' : lambda x: [y.replace(';','') for y in x.text.strip().split('; ')]
     'id' : lambda x: x.text.strip(),
     'time' : lambda x: x.text.strip(),
     'link' : lambda x: x.text.strip(),
@@ -78,17 +78,6 @@ def getHistograms():
             for prefix, timelist in zip(coursePrefixList, coursePrefixTimeList):
                 pdb[prefix] = timelist
 
-        """
-        print(numTimeList)
-
-        plt.ylabel('Number of Classes happening')
-        plt.xlabel('Time')
-        plt.title('Histogram of Classes happening at any time')
-        plt.bar(timeList,numTimeList, width = 4)
-
-        plt.grid(True)
-        plt.show()
-        """
 
 class CourseTime():
     """
@@ -98,7 +87,6 @@ class CourseTime():
 
     Stores course times as list of ranges(tuples with starting and ending time)
     """
-
 
     def __init__(self, s):
         self.ranges = []
@@ -165,14 +153,10 @@ if __name__ == '__main__':
                 return i
         return len(setList)
 
-
-
     setlist = [set()]
     courselist = [[]]
 
     getHistograms()
-
-
 
 
 
