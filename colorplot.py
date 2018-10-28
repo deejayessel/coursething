@@ -27,8 +27,21 @@ def plot(filename, cmap):
 
     plt.title('Class distribution across hours of the week', pad=20, loc='center')
     plt.ylabel('Time of day', labelpad=15)
+
+    def hourlist():
+        l = []
+        for i in range(8*60, 1300, 60): #8:00 am to 9:40 pm
+            hour = i//60
+            min = i % 60
+            l.append(f"{hour}:{min}0")
+        return l
+
+    ticks = hourlist()
+    plt.yticks(range(-1,(1300-8*60)//5,12), ticks)
+
     plt.xlabel('Day of the week', labelpad=15)
     plt.xticks(list(range(5)), 'MTWRF')
+
     plt.savefig(f'{filename}.png',
                 orientation='portrait',
                 quality=90,
