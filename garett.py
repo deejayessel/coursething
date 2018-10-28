@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import html.parser
 from course import *
 import shelve
+import matplotlib.pyplot as plt
 
 select = {
     'title' : '#main > ul > li > div.Rtable-cell.alpha.hiddenSmall.classes',
@@ -54,6 +55,46 @@ def writeCourseDB():
                                    db['time'][i],
                                    db['id'][i],
                                    db['link'][i])
+
+
+def getHistograms():
+        weeklyTimeList = [[x for x in range(480, 1300, 5)], [x for x in range(1920, 2740, 5)],
+            [x for x in range(3360, 4180, 5)],[x for x in range(4800, 5620, 5)],[x for x in range(6240, 7060, 5)]]
+
+        coursePrefixList = ["ALL "]
+        coursePrefixTimeList = [[[0 for x in range(480, 1300, 5)], [0 for x in range(1920, 2740, 5)],
+            [0 for x in range(3360, 4180, 5)],[0 for x in range(4800, 5620, 5)],[0 for x in range(6240, 7060, 5)]]]
+
+        for i in range(0,len(db['title'])):
+            if db['time'][i] in ['Cancelled', 'TBA', '']:
+                continue
+
+            u = CourseTime(db['time'][i])
+            #print(u)
+
+            for j in range(len(coursePrefixList)):
+                if j == len(coursePrefixList) -1:
+                    coursePrefixList = coursePrefixList + [db['title'][i][:4]]
+                    coursePrefixTimeList = coursePrefixTimeList + [[[0 for x in range(480, 1300, 5)], [0 for x in range(1920, 2740, 5)],
+            [0 for x in range(3360, 4180, 5)],[0 for x in range(4800, 5620, 5)],[0 for x in range(6240, 7060, 5)]]]
+                    for s1, e1 in u.ranges:
+                        for k in range(len(weeklyTimeList[0])):
+                            if s1 <= weeklyTimeList[s1//1440][k] and e1 > weeklyTimeList[e1//1440][k]:
+                                coursePrefixTimeList[0][s1//1440][k] +=1
+                                coursePrefixTimeList[j+1][s1//1440][k] +=1
+                    break
+                else:
+                    if db['title'][i][:4] == coursePrefixList[j]:
+                        for s1, e1 in u.ranges:
+                            for k in range(len(weeklyTimeList[0])):
+                                if s1 <= weeklyTimeList[s1//1440][k] and e1 > weeklyTimeList[e1//1440][k]:
+                                    coursePrefixTimeList[0][s1//1440][k] +=1
+                                    coursePrefixTimeList[j][s1//1440][k] +=1
+                        break
+
+        print(coursePrefixList)
+        for i in coursePrefixTimeList[0]:
+            print(i)
 
 
 class CourseTime():
@@ -131,26 +172,42 @@ if __name__ == '__main__':
                 return i
         return len(setList)
 
+
+
     with shelve.open('raw') as db:
         setlist = [set()]
         courselist = [[]]
 
-        for i in range(0,len(db['title']),25):
-            if db['time'][i] in ['Cancelled', 'TBA', '']:
-                continue
 
-            u = CourseTime(db['time'][i])
 
-            # find the first set where there is no conflict with u and add the course there
-            pos = firstUnconflicting(setlist, u)
-            if pos == len(setlist):
-                setlist.append(set())
-                courselist.append([])
-            setlist[pos].add(u)
-            courselist[pos].append(db['title'][i] + "\n" + db['time'][i])
+        # print(numTimeList)
+        # plt.ylabel('Number of Classes happening')
+        # plt.xlabel('Time')
+        # plt.title('Histogram of Classes happening at any time')
+        # plt.bar(timeList,numTimeList, width = 4)
+        #
+        # plt.grid(True)
+        #plt.show()
 
-        for set in reversed(courselist):
-            print("SET START **********")
-            for course in set:
-                print(course)
-            print("********** SET END")
+
+
+
+        # for i in range(0,len(db['title']),250):
+        #     if db['time'][i] in ['Cancelled', 'TBA', '']:
+        #         continue
+        #
+        #     u = CourseTime(db['time'][i])
+        #
+        #     # find the first set where there is no conflict with u and add the course there
+        #     pos = firstUnconflicting(setlist, u)
+        #     if pos == len(setlist):
+        #         setlist.append(set())
+        #         courselist.append([])
+        #     setlist[pos].add(u)
+        #     courselist[pos].append(db['title'][i] + "\n" + db['time'][i])
+        #
+        # for set in reversed(courselist):
+        #     print("SET START **********")
+        #     for course in set:
+        #         print(course)
+        #     print("********** SET END")
