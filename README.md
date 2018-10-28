@@ -1,6 +1,9 @@
-# Courstats 0.2
-## Course statistics
+# Chromatic-Temporal Representation of Course Distribution
 David J. Lee and Garett Tok, 2018
+
+A graphical visualization of course frequencies on a weekly basis.
+Data scraped from https://catalog.williams.edu/list/ using Python and BeautifulSoup.
+`matplotlib.pyplot` used to output graphics. 
 
 ## Distributions
 ### All classes
