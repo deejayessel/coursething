@@ -6,8 +6,8 @@ import shelve
 select = {
     'title' : '#main > ul > li > div.Rtable-cell.alpha.hiddenSmall.classes',
     'dreq' : '#main > ul > li > div.Rtable-cell.hiddenSmall.attr.flexcenter-desktop',
-    'instructors' : '#main > ul > li > div.Rtable-cell.hiddenSmall.instructors',   
-    'id' : '#main > ul > li > div.Rtable-cell.omega.hiddenSmall.Class.Nbr.flexcenter-desktop', 
+    'instructors' : '#main > ul > li > div.Rtable-cell.hiddenSmall.instructors',
+    'id' : '#main > ul > li > div.Rtable-cell.omega.hiddenSmall.Class.Nbr.flexcenter-desktop',
     'time' : '#main > ul > li > div.Rtable-cell.hiddenSmall.times > span',
     'link' : '#main > ul > li > div.Rtable-cell.alpha.hiddenSmall.classes > a',
     }
@@ -41,7 +41,7 @@ def printTable():
             print(f"CATEGORY: {k}")
             for i in v:
                 print(i)
-                
+
 def writeCourseDB():
     with shelve.open('raw') as db, shelve.open('coursedata') as output:
         # for all courses in database
@@ -73,27 +73,25 @@ class CourseTime():
         if s not in ['TBA', 'Cancelled', '']:
             for c in s[:s.find(' ')]: #for all weekdays
                 n = days.find(c)
-                
-                start = s[s.find(' ')+1:s.find(' - ')+1].strip()
-                end = s[s.find(' - ')+3:s.find('\n')+1].strip()
 
-                print(start,end)
+                start = s[s.find(' ')+1:s.find(' - ')+1].strip()
+                end = s[s.find(' - ')+3:s.find('m',s.find(' - '))+2].strip()
 
                 self.ranges.append((self._intify(start, n),
                                     self._intify(end, n)))
         self._checkRep()
 
     def _intify(self, s, daynum):
-        """ 
-        Return a string time as an integer between 0 and 1440 
+        """
+        Return a string time as an integer between 0 and 1440
 
         Pre: assumes that `s` is a well-formed time
 
         (eg) 11:00 am; 1:00 pm
         """
-        
+
         sep = s.find(':')
-        hour = int(s[:sep]) 
+        hour = int(s[:sep])
         if 'pm' in s: hour = (hour%12) + 12
 
         min = int(s[sep+1:sep+3])
@@ -118,7 +116,7 @@ class CourseTime():
         return self.__str__()
 
 if __name__ == '__main__':
-#    readTable()
+    readTable()
 
     def firstUnconflicting(setList, item):
 
@@ -142,15 +140,15 @@ if __name__ == '__main__':
                 continue
 
             u = CourseTime(db['time'][i])
-            
+
             # find the first set where there is no conflict with u and add the course there
             pos = firstUnconflicting(setlist, u)
-            if pos == len(setlist): 
+            if pos == len(setlist):
                 setlist.append(set())
                 courselist.append([])
             setlist[pos].add(u)
             courselist[pos].append(db['title'][i] + "\n" + db['time'][i])
-                    
+
         for set in reversed(courselist):
             print("SET START **********")
             for course in set:
