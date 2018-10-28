@@ -14,5 +14,7 @@ Data scraped from https://catalog.williams.edu/list/ using Python and BeautifulS
 ![div2 distribution](https://raw.githubusercontent.com/deejayessel/coursething/master/imgs/div2.png)
 ### Division 3
 ![div3 distribution](https://raw.githubusercontent.com/deejayessel/coursething/master/imgs/div3.png)
+### Blending of Divisions
+![blended distribution](https://raw.githubusercontent.com/deejayessel/coursething/master/imgs/blended_divisions.png)
 ### Computer Science
 ![csci distribution](https://raw.githubusercontent.com/deejayessel/coursething/master/imgs/csci.png)
