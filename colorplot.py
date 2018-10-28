@@ -36,6 +36,7 @@ def plot(filename, cmap):
                 pad_inches=0.5)
 
 if __name__ == '__main__':
+    plot('csci','Greys')
     plot('div1',"Reds")
     plot('div2',"Greens")
     plot('div3',"Blues")
