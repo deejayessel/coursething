@@ -19,15 +19,21 @@ def plot(filename):
     # make img
     cmap = mpl.colors.Colormap('Greys')
     norm = mpl.colors.Normalize()
+    fig = plt.figure(figsize=(5.0,8.0))
     img = plt.imshow(mt, aspect='auto', cmap="cividis")
 
     # make color bar
     plt.colorbar(img, cmap=cmap, norm=norm)
 
-    plt.title('Class distribution across hours of the week')
-    plt.ylabel('Time of day')
-    plt.xlabel('Day of the week')
-    plt.savefig('o.png')
+    plt.title('Class distribution across hours of the week', pad=20, loc='center')
+    plt.ylabel('Time of day', labelpad=15)
+    plt.xlabel('Day of the week', labelpad=15)
+    plt.xticks(list(range(5)), 'MTWRF')
+    plt.savefig('o.png',
+                orientation='portrait',
+                quality=90,
+                bbox_inches='tight',
+                pad_inches=0.5)
 
 if __name__ == '__main__':
     plot('dumbass')
