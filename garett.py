@@ -43,50 +43,32 @@ def printTable():
             for i in v:
                 print(i)
 
+def updateTimelist(u, weeklyTimeList, coursePrefixTimeList):
+    for s1, e1 in u.ranges:
+        for k in range(len(weeklyTimeList[0])):
+            if s1 <= weeklyTimeList[s1//1440][k] and e1 > weeklyTimeList[e1//1440][k]:
+                coursePrefixTimeList[0][s1//1440][k] +=1
+                coursePrefixTimeList[len(coursePrefixTimeList)-1][s1//1440][k] +=1
+
 def getHistograms():
 
     with shelve.open('raw') as db:
-        weeklyTimeList = [
-            [x for x in range(480, 1300, 5)], 
-            [x for x in range(1920, 2740, 5)],
-            [x for x in range(3360, 4180, 5)],
-            [x for x in range(4800, 5620, 5)],
-            [x for x in range(6240, 7060, 5)]
-            ]
-
-        initial = [[0] * (1300-480)//5 for i in range(5)]
-
-        coursePrefixList = ["ALL "]
-        coursePrefixTimeList = initial
-
-        def updateTimelist(u, weeklyTimeList, coursePrefixTimeList):
-            for s1, e1 in u.ranges:
-                for k in range(len(weeklyTimeList[0])):
-                    if s1 <= weeklyTimeList[s1//1440][k] and e1 > weeklyTimeList[e1//1440][k]:
-                        coursePrefixTimeList[0][s1//1440][k] +=1
-                        coursePrefixTimeList[j+1][s1//1440][k] +=1
-            
+        weeklyTimeList = [[x for x in range(1440*i + 480, 1440*i + 1300, 5)] for i in range(5)]
+        coursePrefixList = ["ALL"]
+        coursePrefixTimeList = [[[0] * ((1300-480)//5) for i in range(5)]]
 
         for i in range(0,len(db['title'])):
             if db['time'][i] in ['Cancelled', 'TBA', '']:
                 continue
 
             u = CourseTime(db['time'][i])
+            toCheck = db['title'][i][:4].strip()
 
-            for j in range(len(coursePrefixList)):
-                if j == len(coursePrefixList) -1:
-                    coursePrefixList += [db['title'][i][:4]]
-                    coursePrefixTimeList.append(initial)
-                    updateTimelist(u, weeklyTimeList, 
-                    break
-                else:
-                    if db['title'][i][:4] == coursePrefixList[j]:
-                        for s1, e1 in u.ranges:
-                            for k in range(len(weeklyTimeList[0])):
-                                if s1 <= weeklyTimeList[s1//1440][k] and e1 > weeklyTimeList[e1//1440][k]:
-                                    coursePrefixTimeList[0][s1//1440][k] +=1
-                                    coursePrefixTimeList[j][s1//1440][k] +=1
-                        break
+            if toCheck != coursePrefixList[len(coursePrefixList)-1]:
+                coursePrefixList.append(toCheck)
+                coursePrefixTimeList.append([[0] * ((1300-480)//5) for i in range(5)])
+
+            updateTimelist(u, weeklyTimeList, coursePrefixTimeList)
 
         print(coursePrefixList)
         for i in coursePrefixTimeList[0]:
@@ -185,11 +167,10 @@ if __name__ == '__main__':
 
 
 
-    with shelve.open('raw') as db:
-        setlist = [set()]
-        courselist = [[]]
+    setlist = [set()]
+    courselist = [[]]
 
-        getHistograms()
+    getHistograms()
 
 
 
